@@ -153,12 +153,29 @@ function exportKeExcel() {
         alert("Belum ada data untuk diunduh!");
         return;
     }
-    let csv = "Tanggal,Hari,Waktu,Kegiatan,Keterangan\n";
-    dataKegiatan.forEach(i => { csv += `${i.tanggal},${i.hari},${i.waktu},${i.namaKegiatan},${i.keterangan}\n`; });
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'Laporan_Baiturrahmah.csv'; a.click();
+
+    // 1. Format ulang data agar nama kolomnya rapi saat dibuka di Excel
+    const dataFormatExcel = dataKegiatan.map(item => ({
+        "Tanggal": item.tanggal.split('-').reverse().join('/'), // Mengubah YYYY-MM-DD menjadi DD/MM/YYYY
+        "Hari": item.hari,
+        "Waktu Tugas": `${item.waktu} WIB`,
+        "Nama Kegiatan": item.namaKegiatan,
+        "Keterangan": item.keterangan || "-"
+    }));
+
+    // 2. Buat lembar kerja baru (Workbook dan Worksheet) menggunakan SheetJS
+    const worksheet = XLSX.utils.json_to_sheet(dataFormatExcel);
+    const workbook = XLSX.utils.book_new();
+
+    // 3. Masukkan data ke dalam sheet dengan nama 'Jurnal Baiturrahmah'
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Jurnal Baiturrahmah");
+
+    // 4. Atur lebar kolom otomatis agar tulisan tidak terpotong di Excel
+    const maxProps = [{ wch: 15 }, { wch: 10 }, { wch: 15 }, { wch: 30 }, { wch: 30 }];
+    worksheet['!cols'] = maxProps;
+
+    // 5. Proses unduhan langsung menjadi file .xlsx asli
+    XLSX.writeFile(workbook, 'Laporan_Kegiatan_Baiturrahmah.xlsx');
 }
 
 function hapusSatu(index) {
