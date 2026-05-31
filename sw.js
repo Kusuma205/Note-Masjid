@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jurnal-masjid-v2'; 
+const CACHE_NAME = 'jurnal-masjid-v3'; 
 const urlsToCache = [
     './',
     './index.html',
