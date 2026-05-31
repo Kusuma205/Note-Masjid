@@ -1,0 +1,15 @@
+{
+    "short_name": "Jurnal Masjid",
+    "name": "Catatan Kegiatan Baiturrahmah",
+    "icons": [
+        {
+            "src": "https://cdn-icons-png.flaticon.com/512/2972/2972185.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ],
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#059669"
+}
