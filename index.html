@@ -33,6 +33,14 @@
             <h2 class="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Tambah Kegiatan Baru</h2>
             <form id="kegiatanForm" class="space-y-4">
 
+                <!-- Tanggal Kegiatan -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Kegiatan</label>
+                    <input type="date" id="tanggal"
+                        class="w-full p-2.5 bg-gray-50 border border-gray-300 rounded-lg focus:ring-emerald-500 focus:border-emerald-500"
+                        required>
+                </div>
+
                 <!-- Pilih Hari -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Hari Tugas</label>
@@ -75,7 +83,7 @@
                 </button>
             </form>
 
-            <!-- FITUR BARU: Tombol Download Excel -->
+            <!-- Tombol Download Excel -->
             <button onclick="exportKeExcel()"
                 class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium p-3 rounded-lg transition duration-200 shadow-sm flex items-center justify-center gap-2 mt-2">
                 📊 Download File Excel (.csv)
@@ -97,133 +105,26 @@
 
     </div>
 
-    <!-- Logika Aplikasi (JavaScript) -->
+    <!-- MEMANGGIL FILE LOGIKA JAVASCRIPT UTAMA -->
+    <script src="script.js"></script>
+
+    <!-- REGISTRASI SERVICE WORKER UNTUK AUTO-UPDATE -->
     <script>
-        const form = document.getElementById('kegiatanForm');
-        const daftarContainer = document.getElementById('daftarKegiatan');
-
-        // Mengambil data lama yang tersimpan di HP/Browser
-        let dataKegiatan = JSON.parse(localStorage.getItem('kegiatanBaiturrahmah')) || [];
-
-        // Fungsi menampilkan data ke layar HP
-        function tampilkanData() {
-            daftarContainer.innerHTML = '';
-
-            if (dataKegiatan.length === 0) {
-                daftarContainer.innerHTML = `<p class="text-center text-gray-500 text-sm py-8 bg-white rounded-xl border border-dashed">Belum ada kegiatan yang dicatat.</p>`;
-                return;
-            }
-
-            // Urutkan otomatis berdasarkan hari (Jumat -> Sabtu -> Minggu) agar rapi
-            const urutanHari = { "Jumat": 1, "Sabtu": 2, "Minggu": 3 };
-            dataKegiatan.sort((a, b) => urutanHari[a.hari] - urutanHari[b.hari] || a.waktu.localeCompare(b.waktu));
-
-            dataKegiatan.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = "bg-white p-4 rounded-xl shadow-xs border-l-4 border-emerald-500 flex justify-between items-start";
-
-                card.innerHTML = `
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <span class="px-2 py-0.5 text-xs font-semibold bg-emerald-100 text-emerald-800 rounded">
-                                ${item.hari}
-                            </span>
-                            <span class="text-xs text-gray-500 font-mono">${item.waktu} WIB</span>
-                        </div>
-                        <h3 class="font-semibold text-gray-800 mt-1">${item.namaKegiatan}</h3>
-                        ${item.keterangan ? `<p class="text-xs text-gray-600 mt-1 italic">"${item.keterangan}"</p>` : ''}
-                    </div>
-                    <button onclick="hapusSatu(${index})" class="text-gray-400 hover:text-red-500 text-sm p-1">
-                        ✕
-                    </button>
-                `;
-                daftarContainer.appendChild(card);
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => {
+                    reg.onupdatefound = () => {
+                        const installingWorker = reg.installing;
+                        installingWorker.onstatechange = () => {
+                            if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                window.location.reload();
+                            }
+                        };
+                    };
+                });
             });
         }
-
-        // Event saat tombol 'Simpan' ditekan
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const dataBaru = {
-                hari: document.getElementById('hari').value,
-                namaKegiatan: document.getElementById('namaKegiatan').value,
-                waktu: document.getElementById('waktu').value,
-                keterangan: document.getElementById('keterangan').value.replace(/,/g, '-') // Mencegah error format Excel
-            };
-
-            dataKegiatan.push(dataBaru);
-            localStorage.setItem('kegiatanBaiturrahmah', JSON.stringify(dataKegiatan)); // Simpan aman di HP
-
-            tampilkanData();
-            form.reset(); // Kosongkan form kembali
-        });
-
-        // Fungsi ekspor data ke file Excel (.csv)
-        function exportKeExcel() {
-            if (dataKegiatan.length === 0) {
-                alert("Belum ada data untuk diunduh. Silakan isi kegiatan terlebih dahulu!");
-                return;
-            }
-
-            // Header kolom Excel
-            let csvContent = "data:text/csv;charset=utf-8,Hari,Waktu,Nama Kegiatan,Keterangan\n";
-
-            // Masukkan baris demi baris data
-            dataKegiatan.forEach(function (rowArray) {
-                let row = `${rowArray.hari},${rowArray.waktu},${rowArray.namaKegiatan},${rowArray.keterangan}`;
-                csvContent += row + "\r\n";
-            });
-
-            // Proses unduh file di HP/Laptop
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "Log_Kegiatan_Baiturrahmah.csv");
-            document.body.appendChild(link);
-
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // Fungsi hapus satu catatan
-        function hapusSatu(index) {
-            if (confirm('Hapus catatan ini?')) {
-                dataKegiatan.splice(index, 1);
-                localStorage.setItem('kegiatanBaiturrahmah', JSON.stringify(dataKegiatan));
-                tampilkanData();
-            }
-        }
-
-        // Fungsi hapus semua data di aplikasi
-        function hapusSemua() {
-            if (confirm('Apakah Anda yakin ingin menghapus semua catatan kegiatan?')) {
-                dataKegiatan = [];
-                localStorage.removeItem('kegiatanBaiturrahmah');
-                tampilkanData();
-            }
-        }
-
-        // Jalankan pemuatan data saat aplikasi pertama kali dibuka
-        tampilkanData();
     </script>
 </body>
-<script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js').then(reg => {
-                // Cek update secara berkala
-                reg.onupdatefound = () => {
-                    const installingWorker = reg.installing;
-                    installingWorker.onstatechange = () => {
-                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            // Jika ada update, langsung reload halaman
-                            window.location.reload();
-                        }
-                    };
-                };
-            });
-        });
-    }
-</script>
+
 </html>
