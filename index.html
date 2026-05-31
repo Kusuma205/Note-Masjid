@@ -208,5 +208,22 @@
         tampilkanData();
     </script>
 </body>
-
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').then(reg => {
+                // Cek update secara berkala
+                reg.onupdatefound = () => {
+                    const installingWorker = reg.installing;
+                    installingWorker.onstatechange = () => {
+                        if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // Jika ada update, langsung reload halaman
+                            window.location.reload();
+                        }
+                    };
+                };
+            });
+        });
+    }
+</script>
 </html>
