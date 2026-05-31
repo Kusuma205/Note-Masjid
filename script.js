@@ -8,7 +8,7 @@ let editIndex = null; // Menandai indeks data yang sedang diedit
 
 const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
-// Fungsi menampilkan arsip per bulan (Dilengkapi tombol Edit & Hapus)
+// Fungsi menampilkan arsip per bulan
 function tampilkanArsip() {
     const container = document.getElementById('arsipContainer');
     container.innerHTML = '';
@@ -18,19 +18,21 @@ function tampilkanArsip() {
         return;
     }
 
-    // Kelompokkan data berdasarkan Bulan dan Tahun
-    const kelompok = {};
+    // 1. Berikan properti id asli (originalIndex) sebelum data di-sort/diacak
+    const dataDenganId = dataKegiatan.map((item, index) => {
+        return { ...item, originalIndex: index };
+    });
 
-    // Berikan ID asli ke setiap data sebelum diurutkan agar tidak salah hapus/edit
-    dataKegiatan.forEach((item, index) => {
-        item.originalIndex = index;
+    // 2. Kelompokkan data berdasarkan Bulan dan Tahun
+    const kelompok = {};
+    dataDenganId.forEach(item => {
         const d = new Date(item.tanggal);
         const kunci = `${namaBulan[d.getMonth()]} ${d.getFullYear()}`;
         if (!kelompok[kunci]) kelompok[kunci] = [];
         kelompok[kunci].push(item);
     });
 
-    // Tampilkan sebagai Folder/Accordion
+    // 3. Tampilkan sebagai Folder/Accordion
     Object.keys(kelompok).reverse().forEach(bulan => {
         const folder = document.createElement('details');
         folder.className = "bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden";
@@ -61,9 +63,20 @@ function tampilkanArsip() {
                     <div class="text-gray-800 font-semibold text-base mt-1">${item.namaKegiatan}</div>
                     ${item.keterangan ? `<div class="text-xs text-gray-500 italic">"${item.keterangan}"</div>` : ''}
                 </div>
-                <div class="flex gap-2 text-xs">
-                    <button onclick="siapkanEdit(${item.originalIndex})" class="text-blue-600 hover:underline font-medium">Edit</button>
-                    <button onclick="hapusSatu(${item.originalIndex})" class="text-red-500 hover:text-red-700 font-semibold">✕</button>
+                <!-- Tombol Aksi Menggunakan Ikon SVG Modern -->
+                <div class="flex gap-3 text-xs pt-1">
+                    <!-- Ikon Edit (Pena Biru) -->
+                    <button onclick="siapkanEdit(${item.originalIndex})" class="text-blue-600 hover:text-blue-800 transition-colors duration-100" title="Edit Data">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                        </svg>
+                    </button>
+                    <!-- Ikon Hapus (Trash/Sampah Merah) -->
+                    <button onclick="hapusSatu(${item.originalIndex})" class="text-red-500 hover:text-red-700 transition-colors duration-100" title="Hapus Data">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9 9m12 6c0 6.3-5.224 11.5-11.5 11.5S1 15.8 1 9.5 6.224 4 12.5 4v2m0-2V2h-1v2m1-2h4v2h-4V2ZM5 7h14l-1.25 13.5a2 2 0 0 1-2 1.5H8.25a2 2 0 0 1-2-1.5L5 7Z" />
+                        </svg>
+                    </button>
                 </div>
             `;
             list.appendChild(itemCard);
@@ -90,7 +103,7 @@ function siapkanEdit(index) {
     // Ubah UI Form ke Mode Edit
     formTitle.innerText = "✏️ Edit Kegiatan";
     submitBtn.innerText = "Perbarui Kegiatan";
-    submitBtn.className = "w-full bg-blue-600 text-white font-medium p-3 rounded-lg shadow-sm hover:bg-blue-700";
+    submitBtn.className = "w-full bg-blue-600 text-white font-medium p-3 rounded-lg shadow-sm hover:bg-blue-700 cursor-pointer";
     btnBatalEdit.classList.remove('hidden');
 
     // Pindahkan user ke Tab Input secara otomatis
@@ -103,7 +116,7 @@ function batalEdit() {
     form.reset();
     formTitle.innerText = "Catat Kegiatan";
     submitBtn.innerText = "Simpan Kegiatan";
-    submitBtn.className = "w-full bg-emerald-600 text-white font-medium p-3 rounded-lg shadow-sm hover:bg-emerald-700";
+    submitBtn.className = "w-full bg-emerald-600 text-white font-medium p-3 rounded-lg shadow-sm hover:bg-emerald-700 cursor-pointer";
     btnBatalEdit.classList.add('hidden');
 }
 
