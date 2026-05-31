@@ -23,6 +23,17 @@ function tampilkanData() {
         if (a.tanggal !== b.tanggal) {
             return new Date(a.tanggal) - new Date(b.tanggal);
         }
+
+        // Urutan hari manual agar Senin di atas dan Minggu di bawah
+        const urutanHari = {
+            "Senin": 1, "Selasa": 2, "Rabu": 3, "Kamis": 4,
+            "Jumat": 5, "Sabtu": 6, "Minggu": 7
+        };
+
+        if (a.hari !== b.hari) {
+            return urutanHari[a.hari] - urutanHari[b.hari];
+        } 
+        
         return a.waktu.localeCompare(b.waktu);
     });
 
