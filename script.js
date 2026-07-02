@@ -12,8 +12,11 @@ const namaBulan = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli
 
 // ... (Simpan fungsi switchTab dan tampilkanArsip seperti yang kamu miliki sekarang) ...
 
+// Ganti seluruh bagian form.addEventListener('submit', ...) kamu dengan kode ini:
+
 form.addEventListener('submit', function (e) {
     e.preventDefault();
+
     const dataBaru = {
         tanggal: document.getElementById('input-tanggal').value,
         hari: document.getElementById('input-hari').value,
@@ -22,9 +25,11 @@ form.addEventListener('submit', function (e) {
         keterangan: document.getElementById('input-keterangan').value
     };
 
+    // Tambahkan indikator loading
     submitBtn.disabled = true;
-    submitBtn.innerText = "Mengirim...";
+    submitBtn.innerText = "Mengirim ke Spreadsheet...";
 
+    // KIRIM DATA KE GOOGLE SHEETS
     fetch(GOOGLE_SHEET_API_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -32,18 +37,30 @@ form.addEventListener('submit', function (e) {
         body: JSON.stringify(dataBaru)
     })
         .then(() => {
-            if (editIndex === null) dataKegiatan.push(dataBaru);
-            else { dataKegiatan[editIndex] = dataBaru; editIndex = null; }
+            // Setelah sukses kirim ke Sheets, baru simpan ke localStorage lokal
+            if (editIndex === null) {
+                dataKegiatan.push(dataBaru);
+            } else {
+                dataKegiatan[editIndex] = dataBaru;
+                editIndex = null;
+                submitBtn.innerText = "Simpan Catatan";
+                formTitle.innerText = "Tambah Kegiatan";
+                btnBatalEdit.classList.add('hidden');
+            }
 
             dataKegiatan.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
             localStorage.setItem('kegiatanBaiturrahmah', JSON.stringify(dataKegiatan));
+
             form.reset();
             submitBtn.disabled = false;
             submitBtn.innerText = "Simpan Catatan";
+
+            alert("Data berhasil disimpan ke Spreadsheet!");
             switchTab('riwayat');
         })
         .catch(err => {
-            alert("Gagal sinkronisasi Cloud. Tersimpan di lokal saja.");
+            console.error("Gagal mengirim:", err);
+            alert("Gagal terhubung ke Google Sheets. Data hanya tersimpan di memori lokal.");
             submitBtn.disabled = false;
             submitBtn.innerText = "Simpan Catatan";
         });
