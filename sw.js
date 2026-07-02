@@ -1,9 +1,9 @@
-const CACHE_NAME = 'jurnal-masjid-v5'; // Versi baru agar cache lama terhapus
+const CACHE_NAME = 'jurnal-masjid-v6'; // Naikkan versi ke v6 untuk memaksa update di HP
 const urlsToCache = [
     './',
     './index.html',
     './manifest.json',
-    './script.js', // WAJIB ADA agar aplikasi jalan offline
+    './script.js',
     'https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4'
 ];
 
