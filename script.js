@@ -1,4 +1,4 @@
-const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycby-J7ux6VGauILrrv1OBc2pe1ZX6wecoaz2w7CEbrp-_SwZX5Stz6sDTwv90dKqXH2T/exec";
+const GOOGLE_SHEET_API_URL = "https://script.google.com/macros/s/AKfycby59d1rVth45hqg0TVvDG0_gTZos60n_YAjTdhvzivwXyKFl2ASNuPjSx6pjRsrtkw/exec";
 
 // Inisialisasi Elemen DOM
 const form = document.getElementById('kegiatanForm');
